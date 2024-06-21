@@ -2,6 +2,7 @@ package shop.project.vendiverse.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,7 +38,7 @@ public class User implements UserDetails {
     private String address;
 
     @Column
-    private boolean email_verified;
+    private boolean email_verified = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -52,6 +53,16 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    @Builder
+    public User(String email, String password, String name, String phone_number, String address, boolean email_verified) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.phone_number = phone_number;
+        this.address = address;
+        this.email_verified = email_verified;
     }
 
 }

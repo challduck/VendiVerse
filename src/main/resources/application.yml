@@ -31,6 +31,12 @@ spring:
           writetimeout: 5000
   application:
     name: "VendiVerse"
+  data:
+    redis:
+      port: 6379
+      host: localhost
+  config:
+    import: optional:file:.env[.properties]
 
 logging:
   level:
@@ -42,6 +48,11 @@ logging:
             sql:
               BasicBinder: TRACE
       springframework:
+        mail: DEBUG
         security: TRACE
 server:
   port: 8080
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret-key: ${JWT_SECRET_KEY}

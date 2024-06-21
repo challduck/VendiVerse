@@ -1,15 +1,92 @@
 package shop.project.vendiverse.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import shop.project.vendiverse.domain.User;
+import shop.project.vendiverse.dto.user.SignInUserRequest;
+import shop.project.vendiverse.dto.user.SignUpUserRequest;
+import shop.project.vendiverse.exception.DuplicateEmailException;
+import shop.project.vendiverse.service.RefreshTokenService;
 import shop.project.vendiverse.service.UserService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
+    private final RefreshTokenService refreshTokenService;
 
+    @PostMapping("/sign-up")
+    public ResponseEntity<String> signUp(@RequestBody SignUpUserRequest request) {
+        try{
+            userService.save(request);
+            return ResponseEntity.ok("회원가입을 축하드립니다. \n 이메일 인증을 진행해 주세요.");
+        } catch (DuplicateEmailException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/email-check")
+    public ResponseEntity<String> userVerifiedEmail(@RequestBody String email, String code) {
+        if (userService.checkVerificationCode(email, code)){
+            return ResponseEntity.ok("이메일이 확인되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("전송된 코드와 일치하지 않습니다.");
+        }
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<String> signIn(@RequestBody SignInUserRequest dto, HttpServletRequest request, HttpServletResponse response){
+        try{
+            User user = userService.signIn(dto);
+            String deviceId = UUID.randomUUID().toString();
+
+            String refreshToken = refreshTokenService.loginSuccessUserGenerateRefreshToken(user, deviceId);
+            String accessToken = refreshTokenService.loginSuccessUserGenerateAccessToken(user);
+
+            Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+            refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
+            refreshTokenCookie.setPath("/");
+
+            response.addCookie(refreshTokenCookie);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + accessToken + ", uuid : " + deviceId);
+
+            return ResponseEntity.ok().body("로그인 성공 " + accessToken);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody String deviceId, HttpServletRequest request){
+        String userEmail = getUserEmailFromRequest(request);
+
+        if (userEmail == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효한 접근이 아닙니다.");
+        }
+
+        User user = userService.findByEmail(userEmail);
+
+        refreshTokenService.deleteRefreshToken(user, deviceId);
+        refreshTokenService.setUserLoggedOut(user, deviceId);
+
+        return ResponseEntity.ok().body("logout");
+    }
+
+    private String getUserEmailFromRequest(HttpServletRequest request) {
+        return request.getUserPrincipal().getName();
+    }
 }
