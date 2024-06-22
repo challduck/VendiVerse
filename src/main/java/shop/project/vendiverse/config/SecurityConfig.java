@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import shop.project.vendiverse.config.jwt.TokenProvider;
 import shop.project.vendiverse.filter.TokenAuthenticationFilter;
-import shop.project.vendiverse.service.RefreshTokenService;
+import shop.project.vendiverse.service.TokenService;
 import shop.project.vendiverse.service.UserService;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
@@ -23,7 +23,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final UserService userService;
-    private final RefreshTokenService refreshTokenService;
+    private final TokenService tokenService;
 
     @Bean
     public WebSecurityCustomizer configure(){
@@ -42,6 +42,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((request)->request
+                        .requestMatchers("/api/order/get-order").authenticated()
                         .anyRequest()
                         .permitAll());
 
@@ -50,6 +51,6 @@ public class SecurityConfig {
 
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider, userService, refreshTokenService);
+        return new TokenAuthenticationFilter(tokenProvider, userService, tokenService);
     }
 }

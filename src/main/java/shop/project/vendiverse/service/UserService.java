@@ -15,9 +15,8 @@ import shop.project.vendiverse.config.RedisConfig;
 import shop.project.vendiverse.domain.User;
 import shop.project.vendiverse.dto.user.SignInUserRequest;
 import shop.project.vendiverse.dto.user.SignUpUserRequest;
-import shop.project.vendiverse.exception.DuplicateEmailException;
-import shop.project.vendiverse.exception.IncorrectPasswordException;
-import shop.project.vendiverse.exception.NotFoundUser;
+import shop.project.vendiverse.exception.ExceptionCode;
+import shop.project.vendiverse.exception.ExceptionResponse;
 import shop.project.vendiverse.repository.UserRepository;
 import shop.project.vendiverse.util.RedisUtil;
 
@@ -42,19 +41,20 @@ public class UserService {
     private RedisUtil redisUtil;
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email)
+                .orElseThrow(()-> new ExceptionResponse(ExceptionCode.NOT_FOUND_USER));
     }
 
     public User findByUserId(Long id){
         return userRepository.findById(id)
-                .orElseThrow(()-> new NotFoundUser("회원 정보를 찾을 수 없습니다."));
+                .orElseThrow(()-> new ExceptionResponse(ExceptionCode.NOT_FOUND_USER));
     }
 
     @Transactional
     public User save(SignUpUserRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())){
-            throw new DuplicateEmailException("이미 가입한 이메일 입니다.");
+            throw new ExceptionResponse(ExceptionCode.DUPLICATE_EMAIL);
         }
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -106,10 +106,11 @@ public class UserService {
     public User signIn(SignInUserRequest dto) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        User user = userRepository.findByEmail(dto.getEmail());
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(()-> new ExceptionResponse(ExceptionCode.NOT_FOUND_USER));
 
         if (!encoder.matches(dto.getPassword(), user.getPassword()) || user.getEmail() == null){
-            throw new IncorrectPasswordException("아이디 또는 비밀번호가 일치하지 않습니다.");
+            throw new ExceptionResponse(ExceptionCode.INCORRECT_ID_OR_PASSWORD);
         }
         return user;
     }
