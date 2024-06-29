@@ -9,10 +9,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import shop.project.vendiverse.domain.User;
+import shop.project.vendiverse.security.UserDetailsImpl;
+import shop.project.vendiverse.security.UserDetailsServiceImpl;
+import shop.project.vendiverse.user.entity.User;
 
-import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,16 +24,17 @@ import java.util.stream.Collectors;
 public class TokenProvider {
 
     private final JwtProperties jwtProperties;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-    public String generateToken(User user, Duration duration) {
+    public String generateToken(User user, Duration duration, UserDetailsImpl userDetails) {
         Date now = new Date();
-        return makeToken(new Date(now.getTime() + duration.toMillis()), user);
+        return makeToken(new Date(now.getTime() + duration.toMillis()), user, userDetails);
     }
 
-    private String makeToken(Date expiry, User user) {
+    private String makeToken(Date expiry, User user, UserDetailsImpl userDetails) {
         Date now = new Date();
 
-        Collection<? extends GrantedAuthority> authorities = user.getAuthorities();
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
         List<String> authorityStrings = authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
@@ -50,11 +53,12 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaim(token);
+
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(claims.getSubject());
+
         Collection<? extends GrantedAuthority> authorities = getAuthorities(claims);
 
-        return new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities), token, authorities
-        );
+        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Claims claims) {
@@ -76,6 +80,16 @@ public class TokenProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public boolean isTokenExpired(String token) {
+        Date expiration = Jwts.parser()
+                .setSigningKey(jwtProperties.getSecretKey())
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+
+        return expiration.before(new Date());
     }
 
     public Long getUserIdFromToken(String token) {
