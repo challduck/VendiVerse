@@ -1,5 +1,9 @@
 INSERT INTO member(email, password, name, phone_number, address, email_verified) VALUES ('user1@email.com', '$2a$10$ZJN6q89.OM4Ir55aK4dIxuLOO4yxmzbl5qs68j0VATnyXXrDVt7My', 'ryan', '010-1234-5678', 'addr', true);
 INSERT INTO member(email, password, name, phone_number, address, email_verified) VALUES ('user2@email.com', '$2a$10$ZJN6q89.OM4Ir55aK4dIxuLOO4yxmzbl5qs68j0VATnyXXrDVt7My', 'ryan', '010-1234-5678', 'addr', true);
+INSERT INTO user_roles(user_id, role) VALUES
+                                          ((SELECT id FROM member WHERE email='user1@email.com'), 'USER'),
+                                          ((SELECT id FROM member WHERE email='user1@email.com'), 'SELLER'),
+                                          ((SELECT id FROM member WHERE email='user2@email.com'), 'USER');
 
 INSERT INTO product (name, description, price, stock) VALUES
                                                           ('사과', '신선한 빨간 사과', 1200, 50),
