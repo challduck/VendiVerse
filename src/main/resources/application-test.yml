@@ -1,16 +1,14 @@
 spring:
+  profiles:
+    active: test
   sql:
     init:
       mode: always
   jpa:
     hibernate:
       ddl-auto: update
-    defer-datasource-initialization: true
+#    defer-datasource-initialization: true
   datasource:
-#    generate-unique-name: false
-#    url: jdbc:h2:mem:testdb
-#    username: sa
-
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:13306/e_commerce?useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -43,31 +41,6 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: TRACE
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
-      springframework:
-        mail: DEBUG
-        security: TRACE
-server:
-  port: 8080
-
 jwt:
   issuer: ${JWT_ISSUER}
   secret-key: ${JWT_SECRET_KEY}
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-
-  instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}

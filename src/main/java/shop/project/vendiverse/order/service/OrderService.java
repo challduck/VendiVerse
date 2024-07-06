@@ -50,12 +50,15 @@ public class OrderService {
 
         List<Long> cartId = request.cartId();
         long amount = 0;
-
+        /*
+            transaction 내 조회 요청 최소화
+            List로 받아오는
+         */
         // 1. 재고 확인
         for (Long l : cartId) {
             Cart cart = cartService.findCart(l);
 
-            Product product = cartService.findCart(l).getProduct();
+            Product product = cart.getProduct();
 
             int stock = productStockService.getStock(product.getId()).stock();
 
@@ -83,7 +86,7 @@ public class OrderService {
             Cart cart = cartService.findCart(l);
             orderItemService.saveOrderItem(cart, order);
             // 6. Cart 삭제
-            cartService.cartRemoveProduct(userDetails, l);
+//            cartService.cartRemoveProduct(userDetails, l);
         }
 
         // 4. payment method 저장

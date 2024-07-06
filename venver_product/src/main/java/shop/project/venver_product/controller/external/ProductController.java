@@ -1,4 +1,4 @@
-package shop.project.vendiverse.product.controller;
+package shop.project.venver_product.controller.external;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import shop.project.vendiverse.product.entity.Product;
-import shop.project.vendiverse.product.dto.ViewAllProductResponse;
-import shop.project.vendiverse.product.dto.ViewProductResponse;
-import shop.project.vendiverse.product.service.ProductService;
+import shop.project.venver_product.service.ProductService;
 
 import java.util.List;
 import java.util.stream.Collectors;

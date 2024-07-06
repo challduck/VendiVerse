@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: venver_gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+#          lower-case-service-id: true
+      routes:
+#        - id: venver_user
+#          uri: lb://venver-user
+##          uri: http://localhost:14857
+#          predicates:
+#            - Path=/api/v1/user/test/**
+#          filters:
+#            - name: CustomFilter
+#            - AddRequestHeader=first-request, first-request-header
+#            - AddResponseHeader=first-response, first-response-header
+        - id: vendiverse_monol
+          uri: lb://vendiverse
+          #          uri: http://localhost:14857
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - name: CustomFilter
+#            - AddRequestHeader=first-request, first-request-header
+#            - AddResponseHeader=first-response, first-response-header
+
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+#  instance:
+#    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}

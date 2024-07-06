@@ -26,7 +26,7 @@ public class TokenService {
     private final static String BLOCKED_ACCESS_TOKEN_PREFIX = "blocked_access_token:";
 
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofMillis(7 * 24 * 60 * 60 * 1000);
-    public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMillis(5 * 60 * 1000);
+    public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMillis(60 * 60 * 1000);
 
     public String loginSuccessUserGenerateRefreshToken(User user, String deviceId) {
         UserDetailsImpl userDetails = new UserDetailsImpl(user);

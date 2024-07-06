@@ -1,12 +1,9 @@
-package shop.project.vendiverse.product.entity;
+package shop.project.venver_product.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.project.vendiverse.cart.entity.Cart;
-import shop.project.vendiverse.product_stock.entity.ProductStock;
-import shop.project.vendiverse.wishlist.entity.WishList;
 
 import java.util.List;
 
@@ -30,17 +27,17 @@ public class Product {
     private int price;
 
 
-    @OneToMany
-    private List<WishList> wishlists;
+//    @OneToMany
+//    private List<WishList> wishlists;
 
 //    @OneToMany
 //    private List<OrderProduct> orderProducts;
 
-//    @OneToMany(mappedBy = "product")
-    @OneToMany
-    private List<Cart> carts;
-
-    @OneToOne
-    private ProductStock productStock;
+    //    @OneToMany(mappedBy = "product")
+//    @OneToMany
+//    private List<Cart> carts;
+//
+//    @OneToOne
+//    private ProductStock productStock;
 
 }
