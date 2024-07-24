@@ -1,6 +1,6 @@
 spring:
   application:
-    name: venver_eureka
+    name: venver-eureka
 server:
   port: 8761
 eureka:

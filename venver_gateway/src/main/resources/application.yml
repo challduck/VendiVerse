@@ -1,35 +1,47 @@
 spring:
   application:
-    name: venver_gateway
+    name: venver-gateway
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-#          lower-case-service-id: true
+          lower-case-service-id: true
       routes:
-#        - id: venver_user
-#          uri: lb://venver-user
-##          uri: http://localhost:14857
-#          predicates:
-#            - Path=/api/v1/user/test/**
-#          filters:
-#            - name: CustomFilter
-#            - AddRequestHeader=first-request, first-request-header
-#            - AddResponseHeader=first-response, first-response-header
-        - id: vendiverse_monol
-          uri: lb://vendiverse
-          #          uri: http://localhost:14857
+        - id: venver_user_service
+          uri: lb://venver-user
           predicates:
-            - Path=/api/v1/**
+            - Path=/api/v1/user/**
+            - Path=/api/v1/cart/**
+            - Path=/api/v1/address/**
           filters:
-            - name: CustomFilter
-#            - AddRequestHeader=first-request, first-request-header
-#            - AddResponseHeader=first-response, first-response-header
+            - name: JWTFilter
+        - id: vendiverse_product_service
+          uri: lb://venver-product
+          predicates:
+            - Path=/api/v1/product/**
+            - Path=/api/v1/stock/**
+        - id: venver_order_service
+          uri: lb://venver-order
+          predicates:
+            - Path=/api/v1/order/**
+          filters:
+            - name: JWTFilter
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: "Spring Cloud Gateway Global Filter"
+            preLogger: true
+            postLogger: true
+    loadbalancer:
+      retry:
+        enabled: true
 
 server:
   port: 8000
-
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
 eureka:
   client:
     register-with-eureka: true

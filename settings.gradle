@@ -4,4 +4,5 @@ include 'venver_gateway'
 include 'venver_user'
 include 'venver_product'
 include 'venver_order'
+include 'venver_rabbitmq'
 

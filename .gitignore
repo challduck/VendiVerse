@@ -35,6 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+application-dev.yml
+application-test.yml
+application-local.yml
 
-
-.env
+venver_user/.env
